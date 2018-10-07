@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-//import {Get} from '../modules/functions';
 var functions = require('../modules/functions.js');
 var GetID = functions.GetID;
 var Post = functions.Post;
@@ -12,18 +11,17 @@ functions.CargarData();
 
 /* GET pizzas listing. */
 router.get('/', function(req, res, next) {
-  
-  res.send(Get());
+ 
+  res.status(200).send(Get());
 });
 
 /* GET pizza with an ID listing */
 router.get('/:id', function(req, res, next) {
   var id = req.params.id;
   var pizza = GetID(id);
-
   if(pizza != false)
   {
-    res.send(pizza);
+    res.status(200).send(pizza);
   }else{
     res.status(404).send('{"message":"Object not found"}');
   }
@@ -31,25 +29,54 @@ router.get('/:id', function(req, res, next) {
 });
 
 
-/*
 //POST of a pizza item
-app.post('/', function(req, res) {
-  var data = req.body.data;
-  res.send('Add ' + data);
+router.post('/', function(req, res) {
+  var data = req.body;
+  if(Object.keys(data).length === 0){
+    res.status(400).send("The body cannot be empty");
+    return;
+  }
+  if(Post(data)){
+    res.status(201).send("Transaction Processed");
+  } else{
+    res.status(500).send("The item cannot be inserted");
+  } 
+
 });
 
+
 //PUT of a pizza item
-app.put('/', function(req, res) {
-  var itemId = req.body.id;
-  var data = req.body.data;
-  res.send('Update ' + itemId + ' with ' + data);
+router.put('/', function(req, res) {
+  var data = req.body;
+  if(Object.keys(data).length === 0){
+    res.status(400).send("The body cannot be empty");
+    return;
+  }
+  var response = Put(data);
+  if( response== true){
+    res.status(204).send("Transaction Processed");
+  }else{
+    if(response == 1){
+      res.status(500).send("Invalid item");
+    }else{
+      if(response == false){
+        res.status(404).send("Object not found");
+      }
+    }
+
+  }
 });
 
 //Delete of a pizza item
-app.delete('/:id', function(req, res) {
+router.delete('/:id', function(req, res) {
   var itemId = req.params.id;
+  
+  if(Delete(itemId)){
+    res.status(204).send("Transaction Processed");
+  }else{
+    res.status(404).send("Object not found");
+  }
   res.send('Delete ' + itemId);
 });
-*/
 
 module.exports = router;

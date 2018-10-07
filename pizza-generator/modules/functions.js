@@ -12,6 +12,15 @@ class Pizza {
     }
 
 }
+
+class Response {
+    constructor(code, isSuccessful, data){
+        this.code = code;
+        this.isSuccessful = isSuccessful;
+        this.data = data;
+    }
+}
+
 var pizzas = new Map();
 
 
@@ -59,7 +68,7 @@ exports.Get = function(){
 exports.Delete = function(id){
     try {
         let pizza = pizzas.get(id);
-        if(isUndefined(pizza))
+        if(pizza == null)
         {
             return false;
         }
@@ -76,7 +85,16 @@ exports.Delete = function(id){
 
 exports.Post = function (item){
 try {
-    let pizza = JSON.parse(item);
+    //var example = JSON.stringify(new Pizza("1", "Napolitana", "Redonda", "Grande", "todos", "si"));
+    if(item.id == null || item.nombre == null || item.forma == null || item.ingredientes == null || item.size ==null || item.orilla == null){
+        return false;
+    }
+
+    let pizza = new Pizza(item.id, item.nombre, item.forma, item.size, item.ingredientes, item.orilla);
+    let aux = pizzas.get(pizza.id);
+    if(aux != null){
+        return false;
+    }
     pizzas.set(pizza.id, pizza);
     return true;
 } catch (error) {
@@ -87,12 +105,17 @@ try {
 
 exports.Put = function (item){
     try{
-        let pizza = JSON.parse(item);
-        if(isUndefined(pizzas.get(pizza.id))){
+        if(item.id == null || item.nombre == null || item.forma == null || item.ingredientes == null || item.size ==null || item.orilla == null){
+            return 1;
+        }
+       let pizza = new Pizza(item.id, item.nombre, item.forma, item.size, item.ingredientes, item.orilla);
+
+        if(pizzas.get(pizza.id) == null){
             return false;
         }
         else{
             pizzas.set(pizza.id, pizza);
+            return true;
         }
     }catch (error){
         console.log(error);
