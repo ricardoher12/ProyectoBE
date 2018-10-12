@@ -10,21 +10,26 @@ functions.CargarData();
 
 
 /* GET pizzas listing. */
-router.get('/', function(req, res, next) {
- 
-  res.status(200).send(Get());
+router.get('/', async function(req, res, next) {
+ var getitems = Get();
+ await getitems.then(function(result){
+   var responseGet = JSON.stringify(result);
+   res.status(200).send(responseGet);
+ });
+  
 });
 
 /* GET pizza with an ID listing */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', async function(req, res, next) {
   var id = req.params.id;
-  var pizza = GetID(id);
-  if(pizza != false)
-  {
-    res.status(200).send(pizza);
-  }else{
-    res.status(404).send('{"message":"Object not found"}');
-  }
+  var getIDItem = GetID(id);
+  await getIDItem.then(function(result){
+    res.status(200).send(result);
+  })
+  .catch(function(rejected){
+    res.status(401).send();
+  });
+
  
 });
 

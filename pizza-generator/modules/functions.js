@@ -1,4 +1,11 @@
 //import { isUndefined } from "util";
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+var url = 'mongodb://localhost:27017/Comida_Rapida';
+const dbName = "Comida_Rapida";
+const collectionName = "Pizza";
+const _id = "_id";
+
 
 class Pizza {
     constructor (id, nombre, forma,  size, ingredientes,  orilla)
@@ -38,51 +45,109 @@ exports.CargarData = function(){
 
 
 
-exports.Get = function(){
+
+
+/*exports.Get = function(){
     
     return JSON.stringify(Array.from(pizzas));
     //return "hola";
+};*/
+
+
+exports.Get =  function(){
+   
+    return new Promise(function (resolve, reject){
+        try {
+            MongoClient.connect(url, function(err, db){
+                if(err){
+                    throw err;
+                }
+                var dbo = db.db(dbName);
+                dbo.collection(collectionName).find({}).toArray(function(err, res) {
+                    if(err){
+                        throw err;
+                    }
+                    console.log("Consulta Exitosa");
+                    db.close();
+                    resolve(JSON.stringify(res));
+                });
+        
+            });
+            
+        } catch (error) {
+            reject(false);
+        }
+        
+    });
 };
 
 
-
- exports.GetID = function (id){
+ /*exports.GetID = function (id){
     try {
-        let pizza = pizzas.get(id);
-        if(pizza == null)
-        {
-            return false;
-        }
-        else{
-            return JSON.stringify(pizza);
-        }
         
+        MongoClient.connect(url, function(err, db){
+            assert.equal(null, err);
+            console.log("Connected to server");
+            var comidaRapida = db.db("Comida_Rapida");
+            var pizza = comidaRapida.collection("pizza");
+        });
     } catch (error) {
         console.log(error);
         return false;
     }
+};*/
+
+
+exports.GetID = function (id){
+    return new Promise(function(resolve, reject){
+        try {
+            MongoClient.connect(url, async function(err, db){
+                if(err){
+                    throw err;
+                }
+                var dbo = db.db(dbName);
+                dbo.collection(collectionName).findOne({_id : id}, function(err, item){
+                    if(err){
+                        throw err;
+                    }
+
+                    if(item == null){
+                       return reject(new Error("item not found"));
+                    }
+
+                    return resolve(JSON.stringify(item));
+                });
+            });
+            
+            
+        } catch (error) {
+            console.log(error);
+            reject(false);
+        }
+    });
+    
+    
 };
+
 
 
 
 exports.Delete = function(id){
     try {
-        let pizza = pizzas.get(id);
-        if(pizza == null)
-        {
-            return false;
-        }
-        else{
-            pizzas.delete(id);
-            return true;
-        }
+        MongoClient.connect(url, async function(err, db){
+            if(err){
+                throw err;
+            }
+            var dbo = db.db(dbName);
+            var db
+        });
 
     } catch (error) {
         console.log(error);
         return false;
     }
 };
-
+/*
 exports.Post = function (item){
 try {
     //var example = JSON.stringify(new Pizza("1", "Napolitana", "Redonda", "Grande", "todos", "si"));
@@ -102,6 +167,29 @@ try {
     return false;
     }
 };
+*/
+
+exports.Post = function (item){
+    try {
+        //var example = JSON.stringify(new Pizza("1", "Napolitana", "Redonda", "Grande", "todos", "si"));
+        MongoClient.connect(url, function(err, db){
+            assert.equal(null, err);
+            var dbo = db.db(dbName);
+            dbo.collection(collectionName).insertOne(item, function(err, res){
+                if(err){
+                    throw err;
+                }
+                console.log("1 document inserted");
+                db.close();
+            });
+
+        });
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+        }
+    };
 
 exports.Put = function (item){
     try{
