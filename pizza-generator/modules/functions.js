@@ -60,12 +60,14 @@ exports.Get =  function(){
         try {
             MongoClient.connect(url, function(err, db){
                 if(err){
-                    throw err;
+                    console.log(err);
+                    return reject(err);
                 }
                 var dbo = db.db(dbName);
                 dbo.collection(collectionName).find({}).toArray(function(err, res) {
                     if(err){
-                        throw err;
+                        console.log(err);
+                        return reject(err);
                     }
                     console.log("Consulta Exitosa");
                     db.close();
@@ -103,18 +105,22 @@ exports.GetID = function (id){
         try {
             MongoClient.connect(url, async function(err, db){
                 if(err){
-                    throw err;
+                    console.log(err);
+                    return reject(err);
                 }
                 var dbo = db.db(dbName);
                 dbo.collection(collectionName).findOne({_id : id}, function(err, item){
                     if(err){
-                        throw err;
+                        //throw err;
+                        console.log(err);
+                        return reject(err);
                     }
 
                     if(item == null){
                        return reject(new Error("item not found"));
                     }
-
+                    console.log("Consulta Exitosa");
+                    db.close();
                     return resolve(JSON.stringify(item));
                 });
             });
