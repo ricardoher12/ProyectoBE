@@ -24,10 +24,10 @@ router.get('/:id', async function(req, res, next) {
   var id = req.params.id;
   var getIDItem = GetID(id);
   await getIDItem.then(function(result){
-    res.status(200).send(result);
+    return res.status(200).send(result);
   })
   .catch(function(rejected){
-    res.status(401).send();
+    return res.status(404).send();
   });
 
  
@@ -35,53 +35,67 @@ router.get('/:id', async function(req, res, next) {
 
 
 //POST of a pizza item
-router.post('/', function(req, res) {
+router.post('/', async function(req, res) {
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
-  if(Post(data)){
-    res.status(201).send("Transaction Processed");
-  } else{
-    res.status(500).send("The item cannot be inserted");
-  } 
 
+  var postItem = Post(data);
+  await postItem.then(function(resolve){
+    return res.status(201).send();
+  })
+  .catch(function(reject){
+  return res.status(501).send(JSON.stringify(reject));
+  });  
 });
+
+
 
 
 //PUT of a pizza item
-router.put('/', function(req, res) {
+router.put('/', async function(req, res) {
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
-  var response = Put(data);
-  if( response== true){
-    res.status(204).send("Transaction Processed");
-  }else{
-    if(response == 1){
-      res.status(500).send("Invalid item");
-    }else{
-      if(response == false){
-        res.status(404).send("Object not found");
-      }
-    }
+  
+ var getItemID = GetID(data.id);
+  await getItemID.then(async function(resolve){
+    var updateItem = Put(data);
+    await updateItem.then(function(resolve){
+      return res.status(204).send();
+    })
+    .catch(function(reject){
+      return res.status(500).send(JSON.stringify(reject));
+    });
 
-  }
+  })
+  .catch(function(reject){
+    res.status(404).send();
+  });
+
 });
 
 //Delete of a pizza item
-router.delete('/:id', function(req, res) {
-  var itemId = req.params.id;
-  
-  if(Delete(itemId)){
-    res.status(204).send("Transaction Processed");
-  }else{
-    res.status(404).send("Object not found");
-  }
-  res.send('Delete ' + itemId);
+router.delete('/:id', async function(req, res) {
+  var id = req.params.id;
+  var getIDItem = GetID(id);
+
+  await getIDItem.then(async function(result){
+    let DeleteItem = Delete(id);
+    await DeleteItem.then(function(result){
+      res.status(204).send(result);
+    })
+    .catch(function(rejected){
+      res.status(500).send(JSON.stringify(rejected));
+    });
+  })
+  .catch(function(rejected){
+    return res.status(404).send();
+  });
 });
 
 module.exports = router;

@@ -4,7 +4,7 @@ var assert = require('assert');
 var url = 'mongodb://localhost:27017/Comida_Rapida';
 const dbName = "Comida_Rapida";
 const collectionName = "Pizza";
-const _id = "_id";
+
 
 
 class Pizza {
@@ -44,16 +44,6 @@ exports.CargarData = function(){
 }
 
 
-
-
-
-/*exports.Get = function(){
-    
-    return JSON.stringify(Array.from(pizzas));
-    //return "hola";
-};*/
-
-
 exports.Get =  function(){
    
     return new Promise(function (resolve, reject){
@@ -84,21 +74,6 @@ exports.Get =  function(){
 };
 
 
- /*exports.GetID = function (id){
-    try {
-        
-        MongoClient.connect(url, function(err, db){
-            assert.equal(null, err);
-            console.log("Connected to server");
-            var comidaRapida = db.db("Comida_Rapida");
-            var pizza = comidaRapida.collection("pizza");
-        });
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-};*/
-
 
 exports.GetID = function (id){
     return new Promise(function(resolve, reject){
@@ -109,7 +84,7 @@ exports.GetID = function (id){
                     return reject(err);
                 }
                 var dbo = db.db(dbName);
-                dbo.collection(collectionName).findOne({_id : id}, function(err, item){
+                dbo.collection(collectionName).findOne({"id" : id}, function(err, item){
                     if(err){
                         //throw err;
                         console.log(err);
@@ -124,8 +99,6 @@ exports.GetID = function (id){
                     return resolve(JSON.stringify(item));
                 });
             });
-            
-            
         } catch (error) {
             console.log(error);
             reject(false);
@@ -137,84 +110,90 @@ exports.GetID = function (id){
 
 
 
-
-exports.Delete = function(id){
-    try {
-        MongoClient.connect(url, async function(err, db){
-            if(err){
-                throw err;
-            }
-            var dbo = db.db(dbName);
-            var db
-        });
-
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-};
-/*
-exports.Post = function (item){
-try {
-    //var example = JSON.stringify(new Pizza("1", "Napolitana", "Redonda", "Grande", "todos", "si"));
-    if(item.id == null || item.nombre == null || item.forma == null || item.ingredientes == null || item.size ==null || item.orilla == null){
-        return false;
-    }
-
-    let pizza = new Pizza(item.id, item.nombre, item.forma, item.size, item.ingredientes, item.orilla);
-    let aux = pizzas.get(pizza.id);
-    if(aux != null){
-        return false;
-    }
-    pizzas.set(pizza.id, pizza);
-    return true;
-} catch (error) {
-    console.log(error);
-    return false;
-    }
-};
-*/
-
-exports.Post = function (item){
-    try {
-        //var example = JSON.stringify(new Pizza("1", "Napolitana", "Redonda", "Grande", "todos", "si"));
-        MongoClient.connect(url, function(err, db){
-            assert.equal(null, err);
-            var dbo = db.db(dbName);
-            dbo.collection(collectionName).insertOne(item, function(err, res){
+exports.Delete =  function(id){
+    return new Promise(async function(resolve, reject){
+        try {
+            MongoClient.connect(url, function(err, db){
                 if(err){
-                    throw err;
+                    console.log(err);
+                    return reject(err);
                 }
-                console.log("1 document inserted");
+                var dbo = db.db(dbName);
+                dbo.collection(collectionName).deleteOne({"id" : id}, function(err, res){
+                if(err){
+                    //throw err;
+                    console.log(err);
+                    return reject(err);
+                }
+                console.log("Eliminacion Exitosa");
                 db.close();
+                return resolve();
+                });
             });
-
-        });
-        return true;
-    } catch (error) {
-        console.log(error);
-        return false;
+        } catch (error) {
+            console.log(error);
+                return false;
         }
+    });
+    
+    
+};
+
+
+exports.Post = function (item){
+    return new Promise(async function(resolve, reject){
+        try {
+            MongoClient.connect(url, function(err, db){
+                if(err){
+                    return reject(err);
+                }
+                var dbo = db.db(dbName);
+                dbo.collection(collectionName).insertOne(item, function(err, res){
+                    if(err){
+                        return reject(err);
+                    }
+                    console.log("1 document inserted");
+                    db.close();
+                });
+    
+            });
+            return resolve();
+        } catch (error) {
+            console.log(error);
+            return false;
+            }
+    });
+    
     };
 
 exports.Put = function (item){
-    try{
-        if(item.id == null || item.nombre == null || item.forma == null || item.ingredientes == null || item.size ==null || item.orilla == null){
-            return 1;
+    return new Promise(async function(resolve, reject){
+        try{
+            MongoClient.connect(url, function(err, db){
+                if(err){
+                    return reject(err);
+                }
+                var dbo = db.db(dbName);
+                var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
+                var query = {id: item.id};
+                dbo.collection(collectionName).updateOne(query, newValues,function(err, res){
+                    if(err){
+                        return reject(err);
+                    }
+                    console.log("1 document updated");
+                    db.close();
+                    return resolve();
+                });
+    
+            });
+        
+        }catch (error){
+            console.log(error);
+            reject(false);
         }
-       let pizza = new Pizza(item.id, item.nombre, item.forma, item.size, item.ingredientes, item.orilla);
 
-        if(pizzas.get(pizza.id) == null){
-            return false;
-        }
-        else{
-            pizzas.set(pizza.id, pizza);
-            return true;
-        }
-    }catch (error){
-        console.log(error);
-        return false;
-    }
+    });
+    
 };
 
  
