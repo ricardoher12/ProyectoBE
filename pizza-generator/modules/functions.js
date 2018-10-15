@@ -1,4 +1,25 @@
 //import { isUndefined } from "util";
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+var url = 'mongodb://localhost:27017/Comida_Rapida';
+const dbName = "Comida_Rapida";
+const collectionName = "Pizza";
+var db;
+var collection;
+
+MongoClient.connect(url, {useNewUrlParser: true, poolSize:10}).then(client =>{
+    db = client.db(dbName);
+    collection = db.collection(collectionName);
+}).catch(error => {
+    // listen for the signal interruption (ctrl-c)
+  process.on('SIGINT', () => {
+    console.log("adios");
+    db.close();
+    process.exit();
+  });
+})
+
+
 
 class Pizza {
     constructor (id, nombre, forma,  size, ingredientes,  orilla)
@@ -37,90 +58,58 @@ exports.CargarData = function(){
 }
 
 
-
-exports.Get = function(){
-    
-    return JSON.stringify(Array.from(pizzas));
-    //return "hola";
-};
-
-
-
- exports.GetID = function (id){
-    try {
-        let pizza = pizzas.get(id);
-        if(pizza == null)
-        {
-            return false;
-        }
-        else{
-            return JSON.stringify(pizza);
-        }
+exports.Get =  function(){
+   try {
+    return collection.find({}).toArray(); 
+   } catch (error) {
+       return Promise.reject(error);
+   }
         
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
 };
 
 
 
-exports.Delete = function(id){
+exports.GetID = function (id){
     try {
-        let pizza = pizzas.get(id);
-        if(pizza == null)
-        {
-            return false;
-        }
-        else{
-            pizzas.delete(id);
-            return true;
-        }
-
+        return collection.findOne({"_id" : id});
     } catch (error) {
-        console.log(error);
-        return false;
+        return Promise.reject(error);
     }
 };
+
+
+
+exports.Delete =  function(id){
+    try {
+        return  collection.deleteOne({"_id" : id});
+    } catch (error) {
+        return Promise.reject(error);
+    }
+    
+};
+
 
 exports.Post = function (item){
-try {
-    //var example = JSON.stringify(new Pizza("1", "Napolitana", "Redonda", "Grande", "todos", "si"));
-    if(item.id == null || item.nombre == null || item.forma == null || item.ingredientes == null || item.size ==null || item.orilla == null){
-        return false;
-    }
+    try {
+        return collection.insertOne(item); 
 
-    let pizza = new Pizza(item.id, item.nombre, item.forma, item.size, item.ingredientes, item.orilla);
-    let aux = pizzas.get(pizza.id);
-    if(aux != null){
-        return false;
+    } catch (error) {
+        return Promise.reject(error);
     }
-    pizzas.set(pizza.id, pizza);
-    return true;
-} catch (error) {
-    console.log(error);
-    return false;
-    }
+    
+      
 };
 
 exports.Put = function (item){
-    try{
-        if(item.id == null || item.nombre == null || item.forma == null || item.ingredientes == null || item.size ==null || item.orilla == null){
-            return 1;
-        }
-       let pizza = new Pizza(item.id, item.nombre, item.forma, item.size, item.ingredientes, item.orilla);
-
-        if(pizzas.get(pizza.id) == null){
-            return false;
-        }
-        else{
-            pizzas.set(pizza.id, pizza);
-            return true;
-        }
-    }catch (error){
-        console.log(error);
-        return false;
+    try {
+        var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
+        var query = {_id: item.id};
+        return collection.updateOne(query, newValues);
+    } catch (error) {
+        return Promise.reject(error);
     }
+ 
+    
 };
 
  

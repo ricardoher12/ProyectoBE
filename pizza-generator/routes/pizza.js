@@ -11,72 +11,101 @@ functions.CargarData();
 
 /* GET pizzas listing. */
 router.get('/', function(req, res, next) {
- 
-  res.status(200).send(Get());
+  res.setHeader("Content-Type", "application/json");
+  Get().then(function(result){
+  if(result.length > 0){
+    var responseGet = JSON.stringify(result);
+   res.status(200).send(responseGet);
+  }else{
+    res.status(404).send();
+  } 
+ }).catch(error => {
+   var message = error.message;
+   res.status(500).send(JSON.stringify({ errorMessage: message }))});
+  
 });
 
 /* GET pizza with an ID listing */
-router.get('/:id', function(req, res, next) {
+router.get('/:id',  function(req, res, next) {
+  res.setHeader("Content-Type", "application/json");
   var id = req.params.id;
-  var pizza = GetID(id);
-  if(pizza != false)
-  {
-    res.status(200).send(pizza);
-  }else{
-    res.status(404).send('{"message":"Object not found"}');
-  }
- 
+  GetID(id).then(result => {
+    if(result != null)
+    {
+      return res.status(200).send(JSON.stringify(result));
+    }
+    else{
+      return res.status(404).send();
+    }
+  }).catch(error => {
+    var message = error.message;
+    res.status(500).send(JSON.stringify({ errorMessage: message }))});
 });
 
 
 //POST of a pizza item
 router.post('/', function(req, res) {
+  res.setHeader("Content-Type", "application/json");
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
-  if(Post(data)){
-    res.status(201).send("Transaction Processed");
-  } else{
-    res.status(500).send("The item cannot be inserted");
-  } 
 
+   Post(data).then(result => {
+    return res.status(201).send();
+  }) .catch(error => {
+    var message = error.message;
+    res.status(500).send(JSON.stringify({ errorMessage: message }))});
 });
+
+
 
 
 //PUT of a pizza item
 router.put('/', function(req, res) {
+  res.setHeader("Content-Type", "application/json");
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
-  var response = Put(data);
-  if( response== true){
-    res.status(204).send("Transaction Processed");
-  }else{
-    if(response == 1){
-      res.status(500).send("Invalid item");
-    }else{
-      if(response == false){
-        res.status(404).send("Object not found");
-      }
+  
+  GetID(data.id).then(result => {
+    if(result != null){
+      Put(data).then(response =>{
+        res.status(204).send();
+      }).catch(error =>{
+        var message = error.message;
+        res.status(500).send(JSON.stringify({ errorMessage: message }))});
     }
-
-  }
-});
+    else{
+      return res.status(404).send();
+    }
+  }).catch(error =>{
+    var message = error.message;
+    res.status(500).send(JSON.stringify({ errorMessage: message }))});
+ });
 
 //Delete of a pizza item
-router.delete('/:id', function(req, res) {
-  var itemId = req.params.id;
-  
-  if(Delete(itemId)){
-    res.status(204).send("Transaction Processed");
-  }else{
-    res.status(404).send("Object not found");
-  }
-  res.send('Delete ' + itemId);
+router.delete('/:id',  function(req, res) {
+  var id = req.params.id;
+  res.setHeader("Content-Type", "application/json");
+  GetID(id).then(result => {
+    if(result != null){
+      Delete(id).then(response =>{
+        res.status(204).send();
+      }).catch(error =>{
+        var message = error.message;
+        res.status(500).send(JSON.stringify({ errorMessage: message }))});
+    }
+    else{
+      return res.status(404).send();
+    }
+  }).catch(error =>{
+    var message = error.message;
+   res.status(500).send(JSON.stringify({ errorMessage: message }))});
+   
 });
 
 module.exports = router;
