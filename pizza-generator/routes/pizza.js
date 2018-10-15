@@ -10,44 +10,46 @@ functions.CargarData();
 
 
 /* GET pizzas listing. */
-router.get('/', async function(req, res, next) {
- var getitems = Get();
- await getitems.then(function(result){
-   var responseGet = JSON.stringify(result);
+router.get('/', function(req, res, next) {
+  Get().then(function(result){
+  if(result.length > 0){
+    var responseGet = JSON.stringify(result);
    res.status(200).send(responseGet);
- });
+  }else{
+    res.status(404).send();
+  } 
+ }).catch(error => {
+   res.status(500).send(JSON.stringify(error)) });
   
 });
 
 /* GET pizza with an ID listing */
-router.get('/:id', async function(req, res, next) {
+router.get('/:id',  function(req, res, next) {
   var id = req.params.id;
-  var getIDItem = GetID(id);
-  await getIDItem.then(function(result){
-    return res.status(200).send(result);
-  })
-  .catch(function(rejected){
-    return res.status(404).send();
-  });
-
- 
+  GetID(id).then(result => {
+    if(result != null)
+    {
+      return res.status(200).send(JSON.stringify(result));
+    }
+    else{
+      return res.status(404).send();
+    }
+  }).catch(error => console.error(error));
 });
 
 
 //POST of a pizza item
-router.post('/', async function(req, res) {
+router.post('/', function(req, res) {
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
 
-  var postItem = Post(data);
-  await postItem.then(function(resolve){
+   Post(data).then(result => {
     return res.status(201).send();
-  })
-  .catch(function(reject){
-  return res.status(501).send(JSON.stringify(reject));
+  }) .catch(error => {
+  return res.status(500).send(JSON.stringify(error));
   });  
 });
 
@@ -55,47 +57,52 @@ router.post('/', async function(req, res) {
 
 
 //PUT of a pizza item
-router.put('/', async function(req, res) {
+router.put('/', function(req, res) {
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
   
- var getItemID = GetID(data.id);
-  await getItemID.then(async function(resolve){
-    var updateItem = Put(data);
-    await updateItem.then(function(resolve){
-      return res.status(204).send();
-    })
-    .catch(function(reject){
-      return res.status(500).send(JSON.stringify(reject));
-    });
-
-  })
-  .catch(function(reject){
-    res.status(404).send();
+  GetID(data.id).then(result => {
+    if(result != null){
+      Put(data).then(response =>{
+        res.status(204).send();
+      }).catch(error =>{
+        return res.status(500).send(JSON.stringify(error));
+      });
+    }
+    else{
+      return res.status(404).send();
+    }
+  }).catch(error =>{
+    return res.status(500).send(JSON.stringify(error));
   });
+ 
+
+  
 
 });
 
 //Delete of a pizza item
-router.delete('/:id', async function(req, res) {
+router.delete('/:id',  function(req, res) {
   var id = req.params.id;
-  var getIDItem = GetID(id);
 
-  await getIDItem.then(async function(result){
-    let DeleteItem = Delete(id);
-    await DeleteItem.then(function(result){
-      res.status(204).send(result);
-    })
-    .catch(function(rejected){
-      res.status(500).send(JSON.stringify(rejected));
-    });
-  })
-  .catch(function(rejected){
-    return res.status(404).send();
+  GetID(id).then(result => {
+    if(result != null){
+      Delete(id).then(response =>{
+        res.status(204).send();
+      }).catch(error =>{
+        return res.status(500).send(JSON.stringify(error));
+      });
+    }
+    else{
+      return res.status(404).send();
+    }
+  }).catch(error =>{
+    return res.status(500).send(JSON.stringify(error));
   });
+   
 });
 
 module.exports = router;

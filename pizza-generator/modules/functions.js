@@ -4,6 +4,20 @@ var assert = require('assert');
 var url = 'mongodb://localhost:27017/Comida_Rapida';
 const dbName = "Comida_Rapida";
 const collectionName = "Pizza";
+var db;
+var collection;
+
+MongoClient.connect(url, {useNewUrlParser: true, poolSize:10}).then(client =>{
+    db = client.db(dbName);
+    collection = db.collection(collectionName);
+}).catch(error => {
+    // listen for the signal interruption (ctrl-c)
+  process.on('SIGINT', () => {
+    console.log("adios");
+    dbClient.close();
+    process.exit();
+  });
+})
 
 
 
@@ -45,154 +59,33 @@ exports.CargarData = function(){
 
 
 exports.Get =  function(){
-   
-    return new Promise(function (resolve, reject){
-        try {
-            MongoClient.connect(url, function(err, db){
-                if(err){
-                    console.log(err);
-                    return reject(err);
-                }
-                var dbo = db.db(dbName);
-                dbo.collection(collectionName).find({}).toArray(function(err, res) {
-                    if(err){
-                        console.log(err);
-                        return reject(err);
-                    }
-                    console.log("Consulta Exitosa");
-                    db.close();
-                    resolve(JSON.stringify(res));
-                });
-        
-            });
-            
-        } catch (error) {
-            reject(false);
-        }
-        
-    });
+    return collection.find({}).toArray();     
 };
 
 
 
 exports.GetID = function (id){
-    return new Promise(function(resolve, reject){
-        try {
-            MongoClient.connect(url, async function(err, db){
-                if(err){
-                    console.log(err);
-                    return reject(err);
-                }
-                var dbo = db.db(dbName);
-                dbo.collection(collectionName).findOne({"id" : id}, function(err, item){
-                    if(err){
-                        //throw err;
-                        console.log(err);
-                        return reject(err);
-                    }
-
-                    if(item == null){
-                       return reject(new Error("item not found"));
-                    }
-                    console.log("Consulta Exitosa");
-                    db.close();
-                    return resolve(JSON.stringify(item));
-                });
-            });
-        } catch (error) {
-            console.log(error);
-            reject(false);
-        }
-    });
     
-    
+    return collection.findOne({"_id" : id});
 };
 
 
 
 exports.Delete =  function(id){
-    return new Promise(async function(resolve, reject){
-        try {
-            MongoClient.connect(url, function(err, db){
-                if(err){
-                    console.log(err);
-                    return reject(err);
-                }
-                var dbo = db.db(dbName);
-                dbo.collection(collectionName).deleteOne({"id" : id}, function(err, res){
-                if(err){
-                    //throw err;
-                    console.log(err);
-                    return reject(err);
-                }
-                console.log("Eliminacion Exitosa");
-                db.close();
-                return resolve();
-                });
-            });
-        } catch (error) {
-            console.log(error);
-                return false;
-        }
-    });
-    
-    
+    return  collection.deleteOne({"_id" : id});
 };
 
 
 exports.Post = function (item){
-    return new Promise(async function(resolve, reject){
-        try {
-            MongoClient.connect(url, function(err, db){
-                if(err){
-                    return reject(err);
-                }
-                var dbo = db.db(dbName);
-                dbo.collection(collectionName).insertOne(item, function(err, res){
-                    if(err){
-                        return reject(err);
-                    }
-                    console.log("1 document inserted");
-                    db.close();
-                });
     
-            });
-            return resolve();
-        } catch (error) {
-            console.log(error);
-            return false;
-            }
-    });
-    
-    };
+    return collection.insertOne(item);    
+};
 
 exports.Put = function (item){
-    return new Promise(async function(resolve, reject){
-        try{
-            MongoClient.connect(url, function(err, db){
-                if(err){
-                    return reject(err);
-                }
-                var dbo = db.db(dbName);
-                var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
-                var query = {id: item.id};
-                dbo.collection(collectionName).updateOne(query, newValues,function(err, res){
-                    if(err){
-                        return reject(err);
-                    }
-                    console.log("1 document updated");
-                    db.close();
-                    return resolve();
-                });
     
-            });
-        
-        }catch (error){
-            console.log(error);
-            reject(false);
-        }
-
-    });
+ var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
+var query = {_id: item.id};
+return collection.updateOne(query, newValues);
     
 };
 
