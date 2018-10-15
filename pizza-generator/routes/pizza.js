@@ -11,6 +11,7 @@ functions.CargarData();
 
 /* GET pizzas listing. */
 router.get('/', function(req, res, next) {
+  res.setHeader("Content-Type", "application/json");
   Get().then(function(result){
   if(result.length > 0){
     var responseGet = JSON.stringify(result);
@@ -25,6 +26,7 @@ router.get('/', function(req, res, next) {
 
 /* GET pizza with an ID listing */
 router.get('/:id',  function(req, res, next) {
+  res.setHeader("Content-Type", "application/json");
   var id = req.params.id;
   GetID(id).then(result => {
     if(result != null)
@@ -40,6 +42,7 @@ router.get('/:id',  function(req, res, next) {
 
 //POST of a pizza item
 router.post('/', function(req, res) {
+  res.setHeader("Content-Type", "application/json");
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
@@ -58,6 +61,7 @@ router.post('/', function(req, res) {
 
 //PUT of a pizza item
 router.put('/', function(req, res) {
+  res.setHeader("Content-Type", "application/json");
   var data = req.body;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
@@ -87,7 +91,7 @@ router.put('/', function(req, res) {
 //Delete of a pizza item
 router.delete('/:id',  function(req, res) {
   var id = req.params.id;
-
+  res.setHeader("Content-Type", "application/json");
   GetID(id).then(result => {
     if(result != null){
       Delete(id).then(response =>{
