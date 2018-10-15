@@ -14,7 +14,7 @@ MongoClient.connect(url, {useNewUrlParser: true, poolSize:10}).then(client =>{
     // listen for the signal interruption (ctrl-c)
   process.on('SIGINT', () => {
     console.log("adios");
-    dbClient.close();
+    db.close();
     process.exit();
   });
 })
@@ -59,33 +59,56 @@ exports.CargarData = function(){
 
 
 exports.Get =  function(){
-    return collection.find({}).toArray();     
+   try {
+    return collection.find({}).toArray(); 
+   } catch (error) {
+       return Promise.reject(error);
+   }
+        
 };
 
 
 
 exports.GetID = function (id){
-    
-    return collection.findOne({"_id" : id});
+    try {
+        return collection.findOne({"_id" : id});
+    } catch (error) {
+        return Promise.reject(error);
+    }
 };
 
 
 
 exports.Delete =  function(id){
-    return  collection.deleteOne({"_id" : id});
+    try {
+        return  collection.deleteOne({"_id" : id});
+    } catch (error) {
+        return Promise.reject(error);
+    }
+    
 };
 
 
 exports.Post = function (item){
+    try {
+        return collection.insertOne(item); 
+
+    } catch (error) {
+        return Promise.reject(error);
+    }
     
-    return collection.insertOne(item);    
+      
 };
 
 exports.Put = function (item){
-    
- var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
-var query = {_id: item.id};
-return collection.updateOne(query, newValues);
+    try {
+        var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
+        var query = {_id: item.id};
+        return collection.updateOne(query, newValues);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+ 
     
 };
 

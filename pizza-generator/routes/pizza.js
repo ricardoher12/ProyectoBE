@@ -20,7 +20,8 @@ router.get('/', function(req, res, next) {
     res.status(404).send();
   } 
  }).catch(error => {
-   res.status(500).send(JSON.stringify(error)) });
+   var message = error.message;
+   res.status(500).send(JSON.stringify({ errorMessage: message }))});
   
 });
 
@@ -36,7 +37,9 @@ router.get('/:id',  function(req, res, next) {
     else{
       return res.status(404).send();
     }
-  }).catch(error => console.error(error));
+  }).catch(error => {
+    var message = error.message;
+    res.status(500).send(JSON.stringify({ errorMessage: message }))});
 });
 
 
@@ -52,8 +55,8 @@ router.post('/', function(req, res) {
    Post(data).then(result => {
     return res.status(201).send();
   }) .catch(error => {
-  return res.status(500).send(JSON.stringify(error));
-  });  
+    var message = error.message;
+    res.status(500).send(JSON.stringify({ errorMessage: message }))});
 });
 
 
@@ -73,20 +76,16 @@ router.put('/', function(req, res) {
       Put(data).then(response =>{
         res.status(204).send();
       }).catch(error =>{
-        return res.status(500).send(JSON.stringify(error));
-      });
+        var message = error.message;
+        res.status(500).send(JSON.stringify({ errorMessage: message }))});
     }
     else{
       return res.status(404).send();
     }
   }).catch(error =>{
-    return res.status(500).send(JSON.stringify(error));
-  });
- 
-
-  
-
-});
+    var message = error.message;
+    res.status(500).send(JSON.stringify({ errorMessage: message }))});
+ });
 
 //Delete of a pizza item
 router.delete('/:id',  function(req, res) {
@@ -97,15 +96,15 @@ router.delete('/:id',  function(req, res) {
       Delete(id).then(response =>{
         res.status(204).send();
       }).catch(error =>{
-        return res.status(500).send(JSON.stringify(error));
-      });
+        var message = error.message;
+        res.status(500).send(JSON.stringify({ errorMessage: message }))});
     }
     else{
       return res.status(404).send();
     }
   }).catch(error =>{
-    return res.status(500).send(JSON.stringify(error));
-  });
+    var message = error.message;
+   res.status(500).send(JSON.stringify({ errorMessage: message }))});
    
 });
 
