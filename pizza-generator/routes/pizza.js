@@ -63,15 +63,16 @@ router.post('/', function(req, res) {
 
 
 //PUT of a pizza item
-router.put('/', function(req, res) {
+router.put('/:id', function(req, res) {
   res.setHeader("Content-Type", "application/json");
   var data = req.body;
+  var id = req.params.id;
   if(Object.keys(data).length === 0){
     res.status(400).send("The body cannot be empty");
     return;
   }
   
-  GetID(data.id).then(result => {
+  GetID(id).then(result => {
     if(result != null){
       Put(data).then(response =>{
         res.status(204).send();
