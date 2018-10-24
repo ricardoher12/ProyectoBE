@@ -91,7 +91,9 @@ exports.Delete =  function(id){
 
 exports.Post = function (item){
     try {
-        return collection.insertOne(item); 
+        datos = JSON.parse(item.data);
+        var newPizza = {_id : datos._id, nombre : datos.nombre, forma : datos.forma, size: datos.size, ingredientes : datos.ingredientes, orilla: datos.orilla}
+        return collection.insertOne(newPizza); 
 
     } catch (error) {
         return Promise.reject(error);
@@ -100,10 +102,11 @@ exports.Post = function (item){
       
 };
 
-exports.Put = function (item){
+exports.Put = function (dato){
     try {
+        item = JSON.parse(dato.data);
         var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
-        var query = {_id: item.id};
+        var query = {_id: item._id};
         return collection.updateOne(query, newValues);
     } catch (error) {
         return Promise.reject(error);
