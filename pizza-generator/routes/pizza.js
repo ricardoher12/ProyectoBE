@@ -30,7 +30,7 @@ router.get('/', function(req, res, next) {
       Get().then(function(result){
         if(result.length > 0){
           clientRedis.flushall();
-          clientRedis.setex("pizzas", 30 ,JSON.stringify(result))
+          clientRedis.setex("pizzas", 5 ,JSON.stringify(result))
           var responseGet = JSON.stringify(result);
           result.forEach(element => {
             clientRedis.setex(element._id.toString(), 30, JSON.stringify(element));
@@ -58,9 +58,9 @@ router.get('/:id',  function(req, res, next) {
     }
     else{
       GetID(id).then(result => {
-        if(result != null)
+        if(result)
         {
-          clientRedis.setex(result._id, 30, JSON.stringify(result));
+          clientRedis.setex(result._id, 5, JSON.stringify(result));
           return res.status(200).send(JSON.stringify(result));
         }
         else{
@@ -80,13 +80,16 @@ router.post('/', function(req, res) {
   res.setHeader("Content-Type", "application/json");
   var data = req.body;
   if(Object.keys(data).length === 0){
-    res.status(400).send("The body cannot be empty");
+    res.status(400).send({errorMessage: "El cuerpo no puede estar vacio"});
     return;
   }
 
    Post(data).then(result => {
     return res.status(201).send();
   }) .catch(error => {
+    if(error === 404){
+      return res.status(400).send();
+    }
     var message = error.message;
     res.status(500).send(JSON.stringify({ errorMessage: message }))});
 });
@@ -100,13 +103,13 @@ router.put('/:id', function(req, res) {
   var data = req.body;
   var id = req.params.id;
   if(Object.keys(data).length === 0){
-    res.status(400).send("The body cannot be empty");
+    res.status(400).send({errorMessage: "El cuerpo no puede estar vacio"});
     return;
   }
   
   GetID(id).then(result => {
-    if(result != null){
-      Put(data).then(response =>{
+    if(result){
+      Put(id, data).then(response =>{
         res.status(204).send();
       }).catch(error =>{
         var message = error.message;
@@ -125,7 +128,7 @@ router.delete('/:id',  function(req, res) {
   var id = req.params.id;
   res.setHeader("Content-Type", "application/json");
   GetID(id).then(result => {
-    if(result != null){
+    if(result){
       Delete(id).then(response =>{
         res.status(204).send();
       }).catch(error =>{
@@ -136,6 +139,9 @@ router.delete('/:id',  function(req, res) {
       return res.status(404).send();
     }
   }).catch(error =>{
+    if(error === 404){
+      return res.status(400).send();
+    }
     var message = error.message;
    res.status(500).send(JSON.stringify({ errorMessage: message }))});
    
