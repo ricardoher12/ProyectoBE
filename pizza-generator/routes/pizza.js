@@ -6,7 +6,6 @@ const Post = functions.Post;
 const Put = functions.Put;
 const Delete = functions.Delete;
 const Get = functions.Get;
-functions.CargarData();
 const redis = require('redis');
 const clientRedis = redis.createClient(); // this creates a new client
 clientRedis.on('connect', function() {
@@ -88,7 +87,7 @@ router.post('/', function(req, res) {
     return res.status(201).send();
   }) .catch(error => {
     if(error === 404){
-      return res.status(400).send();
+      return res.status(400).send(JSON.stringify({errorMessage: "La pizza no se pudo insertar"}));
     }
     var message = error.message;
     res.status(500).send(JSON.stringify({ errorMessage: message }))});
@@ -103,7 +102,7 @@ router.put('/:id', function(req, res) {
   var data = req.body;
   var id = req.params.id;
   if(Object.keys(data).length === 0){
-    res.status(400).send({errorMessage: "El cuerpo no puede estar vacio"});
+    res.status(400).send(JSON.stringify({errorMessage: "El cuerpo no puede estar vacio"}));
     return;
   }
   
@@ -116,7 +115,7 @@ router.put('/:id', function(req, res) {
         res.status(500).send(JSON.stringify({ errorMessage: message }))});
     }
     else{
-      return res.status(404).send();
+      return res.status(404).send(JSON.stringify({errorMessage: "La pizza no se pudo modificar"}));
     }
   }).catch(error =>{
     var message = error.message;
