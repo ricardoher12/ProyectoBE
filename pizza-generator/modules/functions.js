@@ -21,7 +21,7 @@ MongoClient.connect(url, {useNewUrlParser: true, poolSize:10}).then(client =>{
 
 
 
-class Pizza {
+/*class Pizza {
     constructor (id, nombre, forma,  size, ingredientes,  orilla)
     {
         this.id = id;
@@ -55,7 +55,7 @@ exports.CargarData = function(){
     pizzas.set("17",new Pizza('17',  'Dynama',  'Redonda', 'Grande',  'Salsa, queso, tomate, cebolla',  "Si"));
     pizzas.set("18",new Pizza( '18',  'Dr IQ',   'Redonda', 'Grande',  'Salsa, queso, tomate, cebolla',  "Si"));
     
-}
+}*/
 
 
 exports.Get =  function(){
@@ -91,7 +91,12 @@ exports.Delete =  function(id){
 
 exports.Post = function (item){
     try {
-        return collection.insertOne(item); 
+        datos = JSON.parse(item.data);
+        if(!datos._id || !datos.nombre || !datos.forma || !datos.size || !datos.ingredientes || !datos.orilla){
+            return Promise.reject(404);
+        }
+        var newPizza = {_id : datos._id, nombre : datos.nombre, forma : datos.forma, size: datos.size, ingredientes : datos.ingredientes, orilla: datos.orilla}
+        return collection.insertOne(newPizza); 
 
     } catch (error) {
         return Promise.reject(error);
@@ -100,10 +105,14 @@ exports.Post = function (item){
       
 };
 
-exports.Put = function (item){
+exports.Put = function (id, dato){
     try {
+        item = JSON.parse(dato.data);
+        if(!item._id || !item.nombre || !item.forma || !item.size || !item.ingredientes || !item.orilla || (item._id != id)){
+            return Promise.reject(404);
+        }
         var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
-        var query = {_id: item.id};
+        var query = {_id: id};
         return collection.updateOne(query, newValues);
     } catch (error) {
         return Promise.reject(error);
