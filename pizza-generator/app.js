@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var pizzaRouter = require('./routes/pizza');
@@ -18,17 +19,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(cors());
 app.use('/', indexRouter);
 app.use('/api/v1/pizzas', pizzaRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next(createError(404));
-});
+
 
 // error handler
 app.use(function(err, req, res, next) {
