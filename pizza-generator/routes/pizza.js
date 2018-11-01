@@ -7,7 +7,8 @@ const Put = functions.Put;
 const Delete = functions.Delete;
 const Get = functions.Get;
 const redis = require('redis');
-const clientRedis = redis.createClient(); // this creates a new client
+const clientRedis = redis.createClient(6379, "redis_app");
+
 clientRedis.on('connect', function() {
   console.log('Redis client connected');
 });

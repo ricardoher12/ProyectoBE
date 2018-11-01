@@ -1,7 +1,7 @@
 //import { isUndefined } from "util";
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
-var url = 'mongodb://localhost:27017/Comida_Rapida';
+var url = 'mongodb://mongo:27017/Comida_Rapida';
 const dbName = "Comida_Rapida";
 const collectionName = "Pizza";
 var db;
@@ -10,6 +10,7 @@ var collection;
 MongoClient.connect(url, {useNewUrlParser: true, poolSize:10}).then(client =>{
     db = client.db(dbName);
     collection = db.collection(collectionName);
+    console.log("MongoDB Conecction Succesfully");
 }).catch(error => {
     // listen for the signal interruption (ctrl-c)
   process.on('SIGINT', () => {
