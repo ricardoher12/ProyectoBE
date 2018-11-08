@@ -55,6 +55,9 @@ router.post('/', function(req, res) {
    Post(data).then(result => {
     return res.status(201).send();
   }) .catch(error => {
+    if(error === 400){
+      return res.status(400).send();
+    }
     var message = error.message;
     res.status(500).send(JSON.stringify({ errorMessage: message }))});
 });
@@ -83,6 +86,9 @@ router.put('/:id', function(req, res) {
       return res.status(404).send();
     }
   }).catch(error =>{
+    if(error === 400){
+      return res.status(400).send();
+    }
     var message = error.message;
     res.status(500).send(JSON.stringify({ errorMessage: message }))});
  });
