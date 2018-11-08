@@ -91,6 +91,9 @@ exports.Delete =  function(id){
 
 exports.Post = function (item){
     try {
+        if(!item._id || !item.nombre || !item.forma || !item.size || !item.ingredientes || !item.orilla){
+            return Promise.reject(404);
+        }
         return collection.insertOne(item); 
 
     } catch (error) {
@@ -102,6 +105,9 @@ exports.Post = function (item){
 
 exports.Put = function (item){
     try {
+        if(!item._id || !item.nombre || !item.forma || !item.size || !item.ingredientes || !item.orilla){
+            return Promise.reject(404);
+        }
         var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
         var query = {_id: item.id};
         return collection.updateOne(query, newValues);

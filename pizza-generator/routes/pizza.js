@@ -30,7 +30,7 @@ router.get('/:id',  function(req, res, next) {
   res.setHeader("Content-Type", "application/json");
   var id = req.params.id;
   GetID(id).then(result => {
-    if(result != null)
+    if(result)
     {
       return res.status(200).send(JSON.stringify(result));
     }
@@ -48,8 +48,8 @@ router.post('/', function(req, res) {
   res.setHeader("Content-Type", "application/json");
   var data = req.body;
   if(Object.keys(data).length === 0){
-    res.status(400).send("The body cannot be empty");
-    return;
+    return res.status(400).send({ error: "The body cannot be empty"});
+    
   }
 
    Post(data).then(result => {
@@ -68,12 +68,11 @@ router.put('/:id', function(req, res) {
   var data = req.body;
   var id = req.params.id;
   if(Object.keys(data).length === 0){
-    res.status(400).send("The body cannot be empty");
-    return;
+    return res.status(400).send({ error: "The body cannot be empty"});
   }
   
   GetID(id).then(result => {
-    if(result != null){
+    if(result){
       Put(data).then(response =>{
         res.status(204).send();
       }).catch(error =>{
@@ -93,7 +92,7 @@ router.delete('/:id',  function(req, res) {
   var id = req.params.id;
   res.setHeader("Content-Type", "application/json");
   GetID(id).then(result => {
-    if(result != null){
+    if(result){
       Delete(id).then(response =>{
         res.status(204).send();
       }).catch(error =>{
