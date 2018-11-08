@@ -103,9 +103,9 @@ exports.Post = function (item){
       
 };
 
-exports.Put = function (item){
+exports.Put = function (id,item){
     try {
-        if(!item._id || !item.nombre || !item.forma || !item.size || !item.ingredientes || !item.orilla){
+        if(!item._id || !item.nombre || !item.forma || !item.size || !item.ingredientes || !item.orilla || (id !== item._id)){
             return Promise.reject(400);
         }
         var newValues= {$set: {nombre: item.nombre, forma: item.forma, size: item.size, ingredientes: item.ingredientes, orilla : item.orilla}};
