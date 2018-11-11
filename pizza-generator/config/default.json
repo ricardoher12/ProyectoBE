@@ -1,0 +1,16 @@
+{
+    "DataBase": {
+      "dbConfig": {
+        "host": "localhost",
+        "port": "27017",
+        "dbName" : "Comida_Rapida"
+      }
+    },
+    "Redis":{
+        "redisConfig": {
+        "host": "localhost",
+        "port": "6379"
+        }
+        
+    }
+  }

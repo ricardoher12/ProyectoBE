@@ -1,7 +1,11 @@
 //import { isUndefined } from "util";
 var MongoClient = require('mongodb').MongoClient;
+const config = require('config');
+const mongoHost = config.get('DataBase.dbConfig.host');
+const mongoPort = config.get('DataBase.dbConfig.port');
 var assert = require('assert');
-var url = 'mongodb://mongo:27017/Comida_Rapida';
+var url = 'mongodb://' + mongoHost + ":" + mongoPort + "/Comida_Rapida";
+console.log(url);
 const dbName = "Comida_Rapida";
 const collectionName = "Pizza";
 var db;
