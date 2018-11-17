@@ -8,8 +8,19 @@ const Delete = functions.Delete;
 const Get = functions.Get;
 const redis = require('redis');
 const config = require('config');
-const redisConfig = config.get('Redis.redisConfig');
-const clientRedis = redis.createClient(redisConfig);
+const redisHost = config.get('Redis.redisConfig.host');
+const redisPort = config.get('Redis.redisConfig.port');
+const clientRedis = redis.createClient(redisPort, redisHost, {enable_offline_queue: true,  
+  retry_strategy: (options) => {
+    if (options.times_connected >= 2) {
+        // End reconnecting after a specific number of tries and flush all commands with a individual error
+        return new Error('Retry attempts exhausted');
+    }
+    // reconnect after
+    return 1000;
+}
+} );
+clientRedis.retry_delay = 0;
 
 clientRedis.on('connect', function() {
   console.log('Redis client connected');
@@ -17,63 +28,102 @@ clientRedis.on('connect', function() {
 
 clientRedis.on('error', function (err) {
   console.log('Something went wrong ' + err);
+  
+  
+  
 });
+
+
+  setInterval(function(){
+    //console.log("Entered to ping");
+    clientRedis.ping(function (err, result){
+      if(result){
+        console.log("Redis pinged");
+      }
+
+      if(err){
+        console.log("There was an error " + err);
+      }
+    })
+
+  }, 60000)
 
 
 /* GET pizzas listing. */
 router.get('/', function(req, res, next) {
-  res.setHeader("Content-Type", "application/json");
+  try{
+    console.log( "Get recivied from " + req.hostname);
+    res.setHeader("Content-Type", "application/json");
+    
+    clientRedis.get('pizzas', (err, result) => {
+      if(result){
+        return res.status(200).send(result);
+      }
+      else{
+        Get().then(function(result){
+          if(result.length > 0){
+            clientRedis.flushall();
+            clientRedis.setex("pizzas", 5 ,JSON.stringify(result))
+            var responseGet = JSON.stringify(result);
+            result.forEach(element => {
+              clientRedis.setex(element._id.toString(), 30, JSON.stringify(element));
+            });
+           return res.status(200).send(responseGet);
+          }else{
+            res.status(404).send();
+          } 
+         }).catch(error => {
+           var message = error.message;
+           res.status(500).send(JSON.stringify({ errorMessage: message }))});
+        
+      }
+    });
+  }
+  catch(error){
+    console.log(error);
+    return res.status(500).send(JSON.stringify({errorMessage: error}));
 
-  clientRedis.get('pizzas', (err, result) => {
-    if(result){
-      return res.status(200).send(result);
-    }
-    else{
-      Get().then(function(result){
-        if(result.length > 0){
-          clientRedis.flushall();
-          clientRedis.setex("pizzas", 5 ,JSON.stringify(result))
-          var responseGet = JSON.stringify(result);
-          result.forEach(element => {
-            clientRedis.setex(element._id.toString(), 30, JSON.stringify(element));
-          });
-         return res.status(200).send(responseGet);
-        }else{
-          res.status(404).send();
-        } 
-       }).catch(error => {
-         var message = error.message;
-         res.status(500).send(JSON.stringify({ errorMessage: message }))});
-      
-    }
-  });
+  }
+ 
+
+ 
     
 });
 
 /* GET pizza with an ID listing */
 router.get('/:id',  function(req, res, next) {
-  res.setHeader("Content-Type", "application/json");
-  var id = req.params.id;
-  clientRedis.get(id, (error, result) =>{
-    if(result){
-        return res.status(200).send(result);
-    }
-    else{
-      GetID(id).then(result => {
-        if(result)
-        {
-          clientRedis.setex(result._id, 5, JSON.stringify(result));
-          return res.status(200).send(JSON.stringify(result));
-        }
-        else{
-          return res.status(404).send();
-        }
-      }).catch(error => {
-        var message = error.message;
-        res.status(500).send(JSON.stringify({ errorMessage: message }))});
+  
+  try{
+    res.setHeader("Content-Type", "application/json");
+    var id = req.params.id;
+    clientRedis.get(id, (error, result) =>{
+      if(result){
+          return res.status(200).send(result);
+      }
+      else{
+        GetID(id).then(result => {
+          if(result)
+          {
+            clientRedis.setex(result._id, 5, JSON.stringify(result));
+            return res.status(200).send(JSON.stringify(result));
+          }
+          else{
+            return res.status(404).send();
+          }
+        }).catch(error => {
+          var message = error.message;
+          res.status(500).send(JSON.stringify({ errorMessage: message }))});
+  
+      }
+    });
 
-    }
-  });
+  }
+  catch(error)
+  {
+    console.log(error);
+    return res.status(500).send(JSON.stringify({errorMessage: error}));
+  }
+  
 });
 
 
