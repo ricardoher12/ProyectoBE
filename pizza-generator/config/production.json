@@ -1,14 +1,14 @@
 {
     "DataBase": {
       "dbConfig": {
-        "host": "mongo-app.westus.azurecontainer.io",
+        "host": "localhost",
         "port": "27017",
         "dbName" : "Comida_Rapida"
       }
     },
     "Redis":{
         "redisConfig": {
-        "host": "redis-app.westus.azurecontainer.io",
+        "host": "localhost",
         "port": "6379"
         }
         
